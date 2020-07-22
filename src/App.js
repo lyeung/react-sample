@@ -1,77 +1,74 @@
-import React, {useState} from 'react';
+import React, {useReducer} from 'react';
 import logo from './logo.svg';
 import './App.css';
 
 function App() {
-  const [state, setState] = useState({
+  const initState = {
     sender: '',
     recipient: '',
     description: '',
     senderAddress: '',
     signature: '',
     status: 'NEW',
-  });
-
-  const descriptionChanged = evt => {
-    setState({
-      ...state,
-      description: evt.target.value,
-    });
+  };
+  /*
+  const initer = args => {
+    return {
+      ...args,
+      status: 'NEW',
+    };
+  };
+*/
+  const reducer = (state, action) => {
+    switch (action.type) {
+      case 'SENDER_CHANGED':
+        return {...state, sender: action.valueChanged};
+      case 'RECIPIENT_CHANGED':
+        return {...state, recipient: action.valueChanged};
+      case 'DESCRIPTION_CHANGED':
+        return {...state, description: action.valueChanged};
+      case 'SENDER_ADDRESS_CHANGED':
+        return {...state, senderAddress: action.valueChanged};
+      case 'SIGNATURE_CHANGED':
+        return {...state, signature: action.valueChanged};
+      case 'STATUS_CHANGED':
+        return {...state, status: action.newStatus};
+      default:
+        return state;
+    }
   };
 
-  const senderChanged = evt => {
-    setState({
-      ...state,
-      sender: evt.target.value,
-    });
-  };
-  const recipientChanged = evt => {
-    setState({
-      ...state,
-      recipient: evt.target.value,
-    });
+  const [state, dispatch] = useReducer(reducer, initState);
+
+  const descriptionChanged = value => {
+    dispatch({type: 'DESCRIPTION_CHANGED', valueChanged: value});
   };
 
-  const senderAddressChanged = evt => {
-    setState({
-      ...state,
-      senderAddress: evt.target.value,
-    });
+  const senderChanged = value => {
+    dispatch({type: 'SENDER_CHANGED', valueChanged: value});
   };
 
-  const statusChanged = evt => {
-    setState({
-      ...state,
-      status: evt.target.value,
-    });
+  const recipientChanged = value => {
+    dispatch({type: 'RECIPIENT_CHANGED', valueChanged: value});
+  };
+
+  const senderAddressChanged = value => {
+    dispatch({type: 'SENDER_ADDRESS_CHANGED', valueChanged: value});
   };
 
   const isShowReady = () => state.status !== 'NEW';
 
-  const signatureChanged = evt => {
-    setState({
-      ...state,
-      signature: evt.target.value,
-    });
+  const signatureChanged = value => {
+    dispatch({type: 'SIGNATURE_CHANGED', valueChanged: value});
   };
 
   const onNext = () => {
     if (state.status === 'NEW') {
-      setState({
-        ...state,
-
-        status: 'READY',
-      });
+      dispatch({type: 'STATUS_CHANGED', newStatus: 'READY'});
     } else if (state.status === 'READY') {
-      setState({
-        ...state,
-        status: 'ENROUTE',
-      });
+      dispatch({type: 'STATUS_CHANGED', newStatus: 'ENROUTE'});
     } else if (state.status === 'ENROUTE') {
-      setState({
-        ...state,
-        status: 'COMPLETED',
-      });
+      dispatch({type: 'STATUS_CHANGED', newStatus: 'COMPLETED'});
     }
   };
 
@@ -82,12 +79,9 @@ function App() {
 
   const onNotHome = () => {
     if (state.status === 'ENROUTE') {
-      setState({
-        ...state,
-        description: '',
-        signature: '',
-        status: 'READY',
-      });
+      descriptionChanged('');
+      signatureChanged('');
+      dispatch({type: 'STATUS_CHANGED', newStatus: 'READY'});
     }
   };
 
@@ -101,7 +95,7 @@ function App() {
           disabled={isCompleted()}
           type="text"
           value={state.sender}
-          onChange={evt => senderChanged(evt)}
+          onChange={evt => senderChanged(evt.target.value)}
         />
       </div>
       <div>
@@ -110,7 +104,7 @@ function App() {
           disabled={isCompleted()}
           type="text"
           value={state.recipient}
-          onChange={evt => recipientChanged(evt)}
+          onChange={evt => recipientChanged(evt.target.value)}
         />
       </div>
       {isShowReady() && (
@@ -120,7 +114,7 @@ function App() {
             disabled={isCompleted()}
             type="text"
             value={state.senderAddress}
-            onChange={evt => senderAddressChanged(evt)}
+            onChange={evt => senderAddressChanged(evt.target.value)}
           />
         </div>
       )}
@@ -133,7 +127,7 @@ function App() {
               disabled={isCompleted()}
               type="text"
               value={state.description}
-              onChange={evt => descriptionChanged(evt)}
+              onChange={evt => descriptionChanged(evt.target.value)}
             />
           </div>
           <div>
@@ -142,7 +136,7 @@ function App() {
               disabled={isCompleted()}
               type="text"
               value={state.signature}
-              onChange={evt => signatureChanged(evt)}
+              onChange={evt => signatureChanged(evt.target.value)}
             />
           </div>
         </div>
